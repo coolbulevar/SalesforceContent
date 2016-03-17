@@ -1,0 +1,38 @@
+@isTest(seeAllData = false)
+private class ContentDistributionTest {
+
+	static testMethod void URLUpdateControllerTest1() {
+		Course__c course_item1 = new Course__c(Name = 'test1', URL__c = 'test1');
+		insert course_item1;
+
+		ContentVersion cVersion = new ContentVersion(
+			Title = 'testTitle',
+			PathOnClient = 'test.png',
+			VersionData = Blob.valueOf('Test Content'),
+			IsMajorVersion = true
+		);
+		insert cVersion;
+
+		List<ContentDocument> cDocuments = [SELECT Id FROM ContentDocument];
+		system.debug('AAAAA cDocuments ' + cDocuments);
+
+		ContentDistribution contentDistribution = new ContentDistribution();
+		contentDistribution.ContentVersionId = cVersion.Id;
+		contentDistribution.Name = 'test.png';
+		contentDistribution.PreferencesAllowOriginalDownload = true;
+		contentDistribution.PreferencesAllowPDFDownload = true;
+		contentDistribution.PreferencesAllowViewInBrowser = true;
+		contentDistribution.PreferencesLinkLatestVersion = true;
+		contentDistribution.PreferencesNotifyOnVisit = false;
+		contentDistribution.RelatedRecordId = course_item1.Id;
+		insert contentDistribution;
+
+		Test.startTest();
+
+			List<ContentDistribution> testContents = [SELECT DistributionPublicUrl FROM ContentDistribution WHERE RelatedRecordId = :course_item1.Id];
+			SYSTEM.DEBUG('AAAAA testContents ' + testContents);
+		
+		Test.stopTest();
+	}
+
+}
